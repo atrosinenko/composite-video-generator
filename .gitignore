@@ -339,3 +339,17 @@ project/plugins/project/
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+
+marsohod2_stub/*.fir
+marsohod2_stub/*.json
+marsohod2_stub/*.rpt
+marsohod2_stub/*.done
+marsohod2_stub/*.summary
+marsohod2_stub/*.smsg
+marsohod2_stub/*.sof
+marsohod2_stub/*.svf
+marsohod2_stub/PLLJ_PLLSPE_INFO.txt
+marsohod2_stub/db
+marsohod2_stub/greybox_tmp
+marsohod2_stub/incremental_db
