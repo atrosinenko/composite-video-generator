@@ -15,17 +15,20 @@ class PalGenerator(clocksPerUs: Int) extends Module {
   })
 
   val bw    = Module(new BWGenerator(clocksPerUs))
-  val color = Module(new PalColorCalculator)
+  val color = Module(new PalColorCalculator(clocksPerUs))
 
   io.red   <> color.io.red
   io.green <> color.io.green
   io.blue  <> color.io.blue
+  bw.io.y  <> color.io.y
 
-  bw.io.L <> color.io.L
-  bw.io.inScanLine <> color.io.scanLine
+  bw.io.L <> color.io.S
+  bw.io.inScanLine  <> color.io.inScanLine
+  bw.io.inPorch     <> color.io.inPorch
+  bw.io.inFirstHalf <> color.io.inFirstHalf
   bw.io.x <> io.x
   bw.io.y <> io.y
 
 
-  io.millivolts := bw.io.millivolts + color.io.millivolts
+  io.millivolts := (bw.io.millivolts + color.io.millivolts).asUInt
 }
