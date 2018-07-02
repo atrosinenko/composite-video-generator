@@ -12,6 +12,7 @@ object Codegen {
       val leds = Output(UInt(4.W))
 
       val millivolts = Output(UInt(12.W))
+      val bits = Output(UInt(6.W))
     })
     val imageGenerator = Module(new TestColorImageGenerator(mhz, 540, 400))
     val encoder = Module(new PalGenerator(clocksPerUs = mhz))
@@ -28,6 +29,7 @@ object Codegen {
     imageGenerator.io.blue  <> encoder.io.blue
 
     io.millivolts := encoder.io.millivolts
+    io.bits := io.millivolts * 64.asUInt / 700.asUInt
 
     override def desiredName: String = "CompositeSignalGenerator"
   }

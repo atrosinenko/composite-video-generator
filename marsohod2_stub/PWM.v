@@ -5,25 +5,21 @@ module PWM( // @[:@3.2]
   input  [11:0] io_denominator, // @[:@6.4]
   output        io_pulse // @[:@6.4]
 );
-  reg [12:0] _T_13; // @[PWM.scala 12:32:@8.4]
+  reg [11:0] _T_13; // @[PWM.scala 12:32:@8.4]
   reg [31:0] _RAND_0;
-  wire [12:0] _GEN_0; // @[PWM.scala 13:35:@9.4]
-  wire [13:0] _T_14; // @[PWM.scala 13:35:@9.4]
-  wire [12:0] _T_15; // @[PWM.scala 13:35:@10.4]
-  wire [12:0] _GEN_1; // @[PWM.scala 14:25:@11.4]
+  wire [12:0] _T_14; // @[PWM.scala 13:35:@9.4]
+  wire [11:0] _T_15; // @[PWM.scala 13:35:@10.4]
   wire  _T_16; // @[PWM.scala 14:25:@11.4]
-  wire [13:0] _T_17; // @[PWM.scala 15:38:@13.4]
-  wire [13:0] _T_18; // @[PWM.scala 15:38:@14.4]
-  wire [12:0] _T_19; // @[PWM.scala 15:38:@15.4]
-  wire [12:0] _T_20; // @[PWM.scala 15:17:@16.4]
-  assign _GEN_0 = {{1'd0}, io_numerator}; // @[PWM.scala 13:35:@9.4]
-  assign _T_14 = _T_13 + _GEN_0; // @[PWM.scala 13:35:@9.4]
-  assign _T_15 = _T_14[12:0]; // @[PWM.scala 13:35:@10.4]
-  assign _GEN_1 = {{1'd0}, io_denominator}; // @[PWM.scala 14:25:@11.4]
-  assign _T_16 = _T_15 >= _GEN_1; // @[PWM.scala 14:25:@11.4]
-  assign _T_17 = _T_15 - _GEN_1; // @[PWM.scala 15:38:@13.4]
+  wire [12:0] _T_17; // @[PWM.scala 15:38:@13.4]
+  wire [12:0] _T_18; // @[PWM.scala 15:38:@14.4]
+  wire [11:0] _T_19; // @[PWM.scala 15:38:@15.4]
+  wire [11:0] _T_20; // @[PWM.scala 15:17:@16.4]
+  assign _T_14 = _T_13 + io_numerator; // @[PWM.scala 13:35:@9.4]
+  assign _T_15 = _T_14[11:0]; // @[PWM.scala 13:35:@10.4]
+  assign _T_16 = _T_15 >= io_denominator; // @[PWM.scala 14:25:@11.4]
+  assign _T_17 = _T_15 - io_denominator; // @[PWM.scala 15:38:@13.4]
   assign _T_18 = $unsigned(_T_17); // @[PWM.scala 15:38:@14.4]
-  assign _T_19 = _T_18[12:0]; // @[PWM.scala 15:38:@15.4]
+  assign _T_19 = _T_18[11:0]; // @[PWM.scala 15:38:@15.4]
   assign _T_20 = io_pulse ? _T_19 : _T_15; // @[PWM.scala 15:17:@16.4]
   assign io_pulse = _T_16;
 `ifdef RANDOMIZE_GARBAGE_ASSIGN
@@ -46,13 +42,13 @@ module PWM( // @[:@3.2]
     `endif
   `ifdef RANDOMIZE_REG_INIT
   _RAND_0 = {1{$random}};
-  _T_13 = _RAND_0[12:0];
+  _T_13 = _RAND_0[11:0];
   `endif // RANDOMIZE_REG_INIT
   end
 `endif // RANDOMIZE
   always @(posedge clock) begin
     if (reset) begin
-      _T_13 <= 13'h0;
+      _T_13 <= 12'h0;
     end else begin
       if (io_pulse) begin
         _T_13 <= _T_19;

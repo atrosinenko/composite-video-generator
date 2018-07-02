@@ -47,7 +47,7 @@ module lpm_constant0 (
 	lpm_constant	LPM_CONSTANT_component (
 				.result (sub_wire0));
 	defparam
-		LPM_CONSTANT_component.lpm_cvalue = 1650,
+		LPM_CONSTANT_component.lpm_cvalue = 2000,
 		LPM_CONSTANT_component.lpm_hint = "ENABLE_RUNTIME_MOD=NO",
 		LPM_CONSTANT_component.lpm_type = "LPM_CONSTANT",
 		LPM_CONSTANT_component.lpm_width = 12;
@@ -63,11 +63,11 @@ endmodule
 // Retrieval info: PRIVATE: JTAG_ID STRING "NONE"
 // Retrieval info: PRIVATE: Radix NUMERIC "10"
 // Retrieval info: PRIVATE: SYNTH_WRAPPER_GEN_POSTFIX STRING "0"
-// Retrieval info: PRIVATE: Value NUMERIC "1650"
+// Retrieval info: PRIVATE: Value NUMERIC "2000"
 // Retrieval info: PRIVATE: nBit NUMERIC "12"
 // Retrieval info: PRIVATE: new_diagram STRING "1"
 // Retrieval info: LIBRARY: lpm lpm.lpm_components.all
-// Retrieval info: CONSTANT: LPM_CVALUE NUMERIC "1650"
+// Retrieval info: CONSTANT: LPM_CVALUE NUMERIC "2000"
 // Retrieval info: CONSTANT: LPM_HINT STRING "ENABLE_RUNTIME_MOD=NO"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "LPM_CONSTANT"
 // Retrieval info: CONSTANT: LPM_WIDTH NUMERIC "12"
