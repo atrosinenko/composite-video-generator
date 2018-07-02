@@ -4,8 +4,8 @@ import chisel3._
 import chisel3.util._
 
 object PalColorCalculator {
-  val ColorCarrierFrequencyMHz = 4.43
-  val LogTableSizeToMHz = 1
+  val ColorCarrierFrequencyMHz = 4.434
+  val LogTableSizeToMHz = 2
 
   val PreburstUs = 0.9
   val BurstCycles = 10.0
@@ -30,6 +30,11 @@ class PalColorCalculator(clocksPerUs: Int) extends Module {
 
   private val regS = RegInit(0.asSInt(9.W))
 
+  // UInt -> SInt conversion does not preserve value for "large" numbers, so widen ourselves first
+  private val R = (io.red   + 0.asUInt(9.W)).asSInt
+  private val G = (io.green + 0.asUInt(9.W)).asSInt
+  private val B = (io.blue  + 0.asUInt(9.W)).asSInt
+
   private val regMv = RegInit(0.asSInt(11.W))
 
   private val Y = (io.red * 222.asUInt + io.green * 707.asUInt + io.blue * 71.asUInt) / 1024.asUInt
@@ -48,19 +53,21 @@ class PalColorCalculator(clocksPerUs: Int) extends Module {
   private val cosineTable = VecInit((0 until TableSize).map(i => (Math.cos(2.0 * Math.PI * i / TableSize) * 256).toInt.asSInt))
 
   private val counter = RegInit(0.asUInt((log2mhz + LogTableSizeToMHz).W))
-  private val tableIndex = ((ColorCarrierFrequencyMHz * 1024 * TableSize).toInt.asUInt * counter / (1024 * clocksPerUs).asUInt)(log2mhz + LogTableSizeToMHz - 1, 0).asUInt
+  private val tableIndex = ((ColorCarrierFrequencyMHz * 1024).toInt.asUInt * counter / (1024 * clocksPerUs / TableSize).asUInt) % TableSize.asUInt
 
   private val phaseFlip = RegInit(false.B)
 
   regMv := 0.asSInt
-  counter := counter + 1.asUInt
-  when (io.y === 0.asUInt) {
+  when (io.y === 1.asUInt && io.inScanLine) {
     phaseFlip := false.B
     counter := 0.asUInt
+  } otherwise {
+    counter := counter + 1.asUInt
   }
   when (io.inPorch) {
     when (preburstCounter === 0.asUInt) {
       phaseFlip := !phaseFlip
+      counter := 0.asUInt
     }
     when (preburstCounter < (PreburstUs * clocksPerUs).toInt.asUInt) {
       preburstCounter := preburstCounter + 1.asUInt
@@ -68,8 +75,8 @@ class PalColorCalculator(clocksPerUs: Int) extends Module {
     } otherwise {
       when (burstCounter < (BurstCycles * clocksPerUs / ColorCarrierFrequencyMHz).toInt.asUInt) {
         regMv := Mux(phaseFlip,
-          cosineTable(tableIndex - (TableSize / 4).asUInt) + sineTable(tableIndex - (TableSize / 4).asUInt),
-          cosineTable(tableIndex + (TableSize / 4).asUInt) + sineTable(tableIndex + (TableSize / 4).asUInt)
+          /*cosineTable(tableIndex - (TableSize / 4).asUInt) +*/ sineTable(tableIndex + (TableSize / 8).asUInt),
+          /*cosineTable(tableIndex + (TableSize / 4).asUInt) +*/ sineTable(tableIndex - (TableSize / 8).asUInt)
         ) / 2.asSInt
         burstCounter := burstCounter + 1.asUInt
       }

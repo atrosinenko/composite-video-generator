@@ -5,13 +5,14 @@ import chisel3.core.withReset
 import io.github.atrosinenko.fpga.common.OneShotPulseGenerator
 
 object BWGenerator {
-  val ScanLineHSyncStartUs = 4.0
+  val FrontPorchUs = 1.65
+  val ScanLineHSyncStartUs = 4.7 + FrontPorchUs
   val ScanLineHSyncEndUs   = 12.0
   val TotalScanLineLengthUs = 64.0
   val xDivisor = 4
 
   val VSyncStart = Seq(
-    2, 30, 2, 30,  // 623 / 311
+    2, 30, 2, 30,  // 623 (scanLineNr = 622) / 311 (310)
     2, 30, 2, 30   // 624 / 312
   )
 
@@ -19,22 +20,22 @@ object BWGenerator {
     30, 2, 30, 2,  // 2 / 314
     30, 2, 30, 2,  // 3 / 315
     2, 30, 2, 30,  // 4 / 316
-    2, 30, 2, 30   // 5 / 317
+    2, 30, 2, 30   // 5 (4) / 317 (316)
   )
 
   val VSync1: Seq[Int] = VSyncStart ++ Seq(
-    2, 30, 2, 30,  // 625
-    30, 2, 30, 2   // 1
-  ) ++ VSyncEnd ++ (6 to 23).flatMap(_ => Seq(4, 60))
+    2, 30, 2, 30,  // 625 (624)
+    30, 2, 30, 2   // 1 (0)
+  ) ++ VSyncEnd ++ (5 to 22).flatMap(_ => Seq(4, 60))
 
   val VSync2: Seq[Int] = VSyncStart ++ Seq(
     2, 30, 30, 2   // 313
-  ) ++ VSyncEnd ++ (318 to 335).flatMap(_ => Seq(4, 60))
+  ) ++ VSyncEnd ++ (317 to 334).flatMap(_ => Seq(4, 60))
 
-  val BlackMv = 300.asUInt(12.W)
+  val BlackMv = 300.asSInt(12.W)
 
-  val FirstHalf = (24, 311)
-  val SecondHalf = (336, 623)
+  val FirstHalf = (23, 310)
+  val SecondHalf = (335, 622)
   val TotalScanLineCount = 625
 }
 
@@ -102,17 +103,19 @@ class BWGenerator(clocksPerUs: Int) extends Module {
 
   io.inPorch := false.B
   when (fieldIActive) {
-    io.millivolts := Mux(fieldIGenerator .io.signal, BlackMv, 0.asUInt).asSInt
+    io.millivolts := Mux(fieldIGenerator .io.signal, BlackMv, 0.asSInt)
   }.elsewhen (fieldIIActive) {
-    io.millivolts := Mux(fieldIIGenerator.io.signal, BlackMv, 0.asUInt).asSInt
+    io.millivolts := Mux(fieldIIGenerator.io.signal, BlackMv, 0.asSInt)
   }.otherwise {
-    when (inScanLineCounter < (ScanLineHSyncStartUs * clocksPerUs).toInt.asUInt) {
+    when (inScanLineCounter < (FrontPorchUs * clocksPerUs).toInt.asUInt) {
+      io.millivolts := BlackMv
+    }.elsewhen (inScanLineCounter < (ScanLineHSyncStartUs * clocksPerUs).toInt.asUInt) {
       io.millivolts := 0.asSInt
     }.elsewhen (inScanLineCounter < (ScanLineHSyncEndUs * clocksPerUs).toInt.asUInt) {
-      io.millivolts := BlackMv.asSInt
+      io.millivolts := BlackMv
       io.inPorch := true.B
     }.otherwise {
-      io.millivolts := (BlackMv + (io.L << 1).asUInt + 30.asUInt).asSInt
+      io.millivolts := (BlackMv + (io.L).asSInt + 30.asSInt)
     }
   }
 }
